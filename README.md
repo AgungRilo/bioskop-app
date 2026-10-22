@@ -39,7 +39,7 @@ Tabel `bioskop` dibuat otomatis saat server pertama kali dijalankan.
    ```
    go run main.go
    ```
-3. Server berjalan di `http://localhost:8082`.
+3. Server berjalan di `http://localhost:8080`.
 
 ### Konfigurasi (environment variable)
 
@@ -50,7 +50,7 @@ Tabel `bioskop` dibuat otomatis saat server pertama kali dijalankan.
 | `DB_USER`     | `agungrilo`  |
 | `DB_PASSWORD` | *(kosong)*   |
 | `DB_NAME`     | `bioskop_db` |
-| `PORT`        | `8082`       |
+| `PORT`        | `8080`       |
 
 Contoh: `DB_USER=postgres DB_PASSWORD=secret PORT=9000 go run main.go`
 
@@ -60,10 +60,13 @@ Contoh: `DB_USER=postgres DB_PASSWORD=secret PORT=9000 go run main.go`
 |--------|------------|----------------------------|
 | POST   | `/bioskop` | Menambahkan bioskop baru   |
 | GET    | `/bioskop` | Menampilkan semua bioskop  |
+| GET    | `/bioskop/:id` | Menampilkan detail bioskop |
+| PUT    | `/bioskop/:id` | Memperbarui data bioskop   |
+| DELETE | `/bioskop/:id` | Menghapus bioskop          |
 
 ### POST /bioskop
 
-Menambahkan bioskop baru. `nama` dan `lokasi` tidak boleh kosong.
+Menambahkan bioskop baru. `nama` dan `lokasi` tidak boleh kosong, `rating` harus 0–5.
 
 **Request body (JSON)**
 ```json
@@ -99,7 +102,7 @@ Menambahkan bioskop baru. `nama` dan `lokasi` tidak boleh kosong.
 
 **Contoh curl**
 ```
-curl -X POST http://localhost:8082/bioskop \
+curl -X POST http://localhost:8080/bioskop \
   -H "Content-Type: application/json" \
   -d '{"nama":"CGV Grand Indonesia","lokasi":"Jakarta","rating":4.5}'
 ```
@@ -124,5 +127,47 @@ Menampilkan semua data bioskop, diurutkan berdasarkan `id`.
 
 **Contoh curl**
 ```
-curl http://localhost:8082/bioskop
+curl http://localhost:8080/bioskop
 ```
+
+### GET /bioskop/:id
+
+Menampilkan detail satu bioskop.
+
+- `200 OK` → `{ "data": { "id": 1, "nama": "...", "lokasi": "...", "rating": 4.5 } }`
+- `400 Bad Request` → `{ "error": "ID harus berupa angka positif" }`
+- `404 Not Found` → `{ "error": "bioskop dengan ID 1 tidak ditemukan" }`
+
+```
+curl http://localhost:8080/bioskop/1
+```
+
+### PUT /bioskop/:id
+
+Memperbarui data bioskop. Body dan validasi sama dengan `POST /bioskop`.
+
+- `200 OK` → `{ "message": "bioskop berhasil diperbarui", "data": { ... } }`
+- `400 Bad Request` → ID tidak valid, JSON tidak valid, nama/lokasi kosong, atau rating di luar 0–5
+- `404 Not Found` → bioskop tidak ditemukan
+
+```
+curl -X PUT http://localhost:8080/bioskop/1 \
+  -H "Content-Type: application/json" \
+  -d '{"nama":"CGV Grand Indonesia","lokasi":"Jakarta Pusat","rating":4.7}'
+```
+
+### DELETE /bioskop/:id
+
+Menghapus bioskop.
+
+- `200 OK` → `{ "message": "bioskop berhasil dihapus" }`
+- `400 Bad Request` → ID tidak valid
+- `404 Not Found` → bioskop tidak ditemukan
+
+```
+curl -X DELETE http://localhost:8080/bioskop/1
+```
+
+### Endpoint tidak dikenal
+
+Semua route yang tidak terdaftar mengembalikan `404` dengan `{ "error": "endpoint tidak ditemukan" }`.
