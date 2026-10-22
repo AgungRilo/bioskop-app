@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -19,7 +20,7 @@ func getEnv(key, fallback string) string {
 }
 
 func ConnectDatabase() {
-	// DATABASE_URL dipakai saat deploy (mis. Render), selain itu pakai DB_* untuk lokal
+	// DATABASE_URL (dari .env) diutamakan, selain itu pakai DB_*
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
 		dsn = fmt.Sprintf("host='%s' port='%s' user='%s' password='%s' dbname='%s' sslmode='%s'",
@@ -36,6 +37,11 @@ func ConnectDatabase() {
 	if err != nil {
 		log.Fatal("gagal membuka koneksi database: ", err)
 	}
+
+	db.SetMaxOpenConns(5)
+	db.SetMaxIdleConns(2)
+	db.SetConnMaxIdleTime(5 * time.Minute)
+
 	if err = db.Ping(); err != nil {
 		log.Fatal("gagal terhubung ke database: ", err)
 	}

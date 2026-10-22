@@ -5,9 +5,13 @@ import (
 
 	"github.com/AgungRilo/bioskop-app/config"
 	"github.com/AgungRilo/bioskop-app/routes"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	// .env opsional, variable dari environment tetap bisa dipakai
+	godotenv.Load()
+
 	config.ConnectDatabase()
 	defer config.DB.Close()
 
