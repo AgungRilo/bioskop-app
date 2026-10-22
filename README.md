@@ -50,9 +50,28 @@ Tabel `bioskop` dibuat otomatis saat server pertama kali dijalankan.
 | `DB_USER`     | `agungrilo`  |
 | `DB_PASSWORD` | *(kosong)*   |
 | `DB_NAME`     | `bioskop_db` |
+| `DB_SSLMODE`  | `disable`    |
 | `PORT`        | `8080`       |
 
 Contoh: `DB_USER=postgres DB_PASSWORD=secret PORT=9000 go run main.go`
+
+Jika `DATABASE_URL` diisi (mis. `postgres://user:pass@host:5432/dbname`), variable `DB_*` diabaikan.
+
+## Deploy ke Render
+
+Project ini sudah menyertakan [`render.yaml`](render.yaml) (Render Blueprint) yang membuat:
+- **Web service** `bioskop-app` (runtime Go, plan free)
+- **PostgreSQL** `bioskop-db` (plan free), terhubung otomatis lewat `DATABASE_URL`
+
+Langkah:
+1. Push repository ke GitHub.
+2. Buka [dashboard.render.com](https://dashboard.render.com) → **New** → **Blueprint**.
+3. Pilih repository ini, lalu klik **Apply**.
+4. Tunggu build selesai. API dapat diakses di `https://bioskop-app-xxxx.onrender.com/bioskop`.
+
+Tabel `bioskop` dibuat otomatis saat aplikasi pertama kali berjalan. `PORT` diisi otomatis oleh Render.
+
+> Catatan: service plan free akan *sleep* jika tidak ada request, sehingga request pertama bisa lambat (~1 menit). Database free Render juga memiliki masa berlaku terbatas.
 
 ## Daftar API
 

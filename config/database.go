@@ -19,13 +19,18 @@ func getEnv(key, fallback string) string {
 }
 
 func ConnectDatabase() {
-	dsn := fmt.Sprintf("host='%s' port='%s' user='%s' password='%s' dbname='%s' sslmode=disable",
-		getEnv("DB_HOST", "localhost"),
-		getEnv("DB_PORT", "5432"),
-		getEnv("DB_USER", "agungrilo"),
-		getEnv("DB_PASSWORD", ""),
-		getEnv("DB_NAME", "bioskop_db"),
-	)
+	// DATABASE_URL dipakai saat deploy (mis. Render), selain itu pakai DB_* untuk lokal
+	dsn := os.Getenv("DATABASE_URL")
+	if dsn == "" {
+		dsn = fmt.Sprintf("host='%s' port='%s' user='%s' password='%s' dbname='%s' sslmode='%s'",
+			getEnv("DB_HOST", "localhost"),
+			getEnv("DB_PORT", "5432"),
+			getEnv("DB_USER", "agungrilo"),
+			getEnv("DB_PASSWORD", ""),
+			getEnv("DB_NAME", "bioskop_db"),
+			getEnv("DB_SSLMODE", "disable"),
+		)
+	}
 
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {

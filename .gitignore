@@ -1,3 +1,4 @@
 bioskop-app
 *.exe
 .env
+/app
